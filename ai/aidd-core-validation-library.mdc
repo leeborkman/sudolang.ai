@@ -1,0 +1,1060 @@
+---
+
+## Storybook Validation
+
+### Story File Exists
+
+```bash
+ls path/to/component.stories.tsx
+```
+**Expected:** File exists (no "No such file or directory" error)
+
+**Usage:** Verify Storybook story file created for UI component
+
+---
+
+### Default Story Present
+
+```bash
+grep "export const Default: Story" path/to/component.stories.tsx
+```
+**Expected:** Match found
+
+**Usage:** Verify mandatory Default story exists
+
+---
+
+### Minimum Story Count
+
+```bash
+grep "export const.*: Story" path/to/component.stories.tsx | wc -l
+```
+**Expected:** Number matches required story count
+
+**Usage:** Verify story coverage level (≥2 for Basic, ≥4 for Standard, ≥8 for Comprehensive)
+
+---
+
+### Story Uses Component
+
+```bash
+grep "component: Component" path/to/component.stories.tsx
+```
+**Expected:** Match found in meta definition
+
+**Usage:** Verify story properly configured with component
+
+---
+
+### Story Imports Component
+
+```bash
+grep "import.*Component.*from.*component'" path/to/component.stories.tsx
+```
+**Expected:** Import statement found
+
+**Usage:** Verify component imported correctly
+
+---
+
+### Stories Render in Storybook
+
+```bash
+npm run storybook &
+sleep 10
+curl -s http://localhost:6006/ | grep "ComponentName"
+killall node
+```
+**Expected:** Component name found in Storybook UI
+
+**Usage:** Verify stories actually render without errors
+
+**Alternative (if Storybook already running):**
+```bash
+curl -s http://localhost:6006/iframe.html?id=apps-componentname--default
+```
+**Expected:** HTTP 200, story loads
+
+---
+
+### Story Args Defined
+
+```bash
+grep "args: {" path/to/component.stories.tsx | wc -l
+```
+**Expected:** At least one args definition per story
+
+**Usage:** Verify stories have prop data
+
+---
+
+### Responsive Stories Present (if needed)
+
+```bash
+grep "viewport:" path/to/component.stories.tsx
+```
+**Expected:** Match found if responsive component
+
+**Usage:** Verify responsive breakpoint stories included
+
+---
+
+### Story Colocation
+
+```bash
+# Component and story in same directory
+dirname $(find . -name "component.tsx") | xargs -I {} ls {}/component.stories.tsx
+```
+**Expected:** Story file found in same directory as component
+
+**Usage:** Verify proper file colocation
+
+---
+description: Standard validation commands and patterns for task validation - use these for objective task completion verification
+alwaysApply: false
+---
+
+# Validation Library
+
+Standard validation commands for common task validation scenarios. Reference these when writing validation scripts in task definitions.
+
+---
+
+## TypeScript Validation
+
+### Basic Compilation Check
+
+```bash
+npm run typecheck
+```
+**Expected:** "0 errors" in output, exit code 0
+
+**Usage:** Verify TypeScript code compiles without errors
+
+---
+
+### Type Resolution Check
+
+```bash
+npm run typecheck 2>&1 | grep "Cannot find"
+```
+**Expected:** No matches (empty output)
+
+**Usage:** Verify all imports resolve correctly
+
+---
+
+### Specific File Type Check
+
+```bash
+npx tsc --noEmit path/to/file.ts
+```
+**Expected:** No errors, exit code 0
+
+**Usage:** Check single file without full project build
+
+---
+
+## Test Execution
+
+### Run All Tests
+
+```bash
+npm run test
+```
+**Expected:** "X passing", no failures, exit code 0
+
+---
+
+### Run Specific Test File
+
+```bash
+npm run test path/to/test.test.ts
+```
+**Expected:** All tests in file pass, exit code 0
+
+---
+
+### Run Test Pattern
+
+```bash
+npm run test --grep "ComponentName"
+```
+**Expected:** All matching tests pass
+
+---
+
+### Count Test Cases
+
+```bash
+grep "describe\|it\|test(" path/to/test.ts | wc -l
+```
+**Expected:** Number of test cases matches requirements count
+
+**Usage:** Verify test coverage for all requirements
+
+---
+
+## File Existence
+
+### Single File
+
+```bash
+ls path/to/file.ext
+```
+**Expected:** File exists (no "No such file or directory" error)
+
+---
+
+### Multiple Files
+
+```bash
+ls file1.ts file2.tsx file3.ts
+```
+**Expected:** All files listed, no errors
+
+---
+
+### Directory Structure
+
+```bash
+ls -la path/to/component/
+```
+**Expected:** Shows component.tsx, types.ts, tests/, etc.
+
+---
+
+## Easel Design System Compliance
+
+### No Custom CSS Files
+
+```bash
+find path/to/component/ -name "*.css"
+```
+**Expected:** No matches (empty output)
+
+**Alternative:**
+```bash
+grep -r "\.css$" path/to/component/
+```
+**Expected:** No matches
+
+**Usage:** Verify no .css files violating Easel-first policy
+
+---
+
+### No Inline Styles
+
+```bash
+grep -r "style={{" path/to/component/
+```
+**Expected:** No matches (empty output)
+
+**Usage:** Verify no inline styles used instead of Easel
+
+---
+
+### Easel Imports Present
+
+```bash
+grep "@canva/ui" path/to/component.tsx
+```
+**Expected:** Multiple matches (Box, Stack, Text, etc.)
+
+**Usage:** Verify Easel Design System components used
+
+---
+
+### Individual Easel Imports (Tree-Shakeable)
+
+```bash
+grep "from '@canva/ui/[^']*'" path/to/component.tsx
+```
+**Expected:** Individual paths like '@canva/ui/box', not barrel import '@canva/ui'
+
+**Usage:** Verify imports are tree-shakeable
+
+---
+
+### Specific Easel Component Usage
+
+```bash
+grep "import { Box } from '@canva/ui/box'" component.tsx
+```
+**Expected:** Match found
+
+**Usage:** Verify specific Easel component imported correctly
+
+---
+
+## MobX Pattern Compliance
+
+### When MobX Required = YES
+
+**Decorators Present:**
+```bash
+grep "@observable\|@action\|@computed" path/to/store.ts
+```
+**Expected:** Matches found
+
+**Observer Wrapper Present:**
+```bash
+grep "observer(" path/to/component.tsx
+```
+**Expected:** Match found
+
+**runInAction for Async:**
+```bash
+grep "runInAction" path/to/store.ts
+```
+**Expected:** Match found (if async operations present)
+
+---
+
+### When MobX Required = NO
+
+**No MobX Decorators:**
+```bash
+grep "@observable\|@action\|@computed\|observer(" path/to/component.tsx
+```
+**Expected:** No matches (empty output)
+
+**Props-Only Component:**
+```bash
+grep "React.FC<.*Props>" path/to/component.tsx
+```
+**Expected:** Match found (functional component with props)
+
+---
+
+## Control Flow Pattern Compliance
+
+### No Else Blocks
+
+```bash
+grep " else " path/to/file.ts
+```
+**Expected:** No matches (empty output)
+
+**Usage:** Verify early return pattern used instead of if-else
+
+---
+
+### Early Return Pattern
+
+```bash
+grep "^  if (.*) {$" -A 1 path/to/file.ts | grep "return"
+```
+**Expected:** Matches found (shows early returns after conditions)
+
+**Usage:** Verify code uses early returns for error/edge cases
+
+---
+
+### Nested Depth Check
+
+```bash
+awk '{print gsub(/\t/, "")}' path/to/file.ts | sort -rn | head -n 1
+```
+**Expected:** ≤3 (max 3 levels of nesting)
+
+**Usage:** Verify code isn't too deeply nested
+
+---
+
+## Import Resolution
+
+### Module Imports Successfully
+
+```bash
+node -e "require('./path/to/module')"
+```
+**Expected:** No errors, exit code 0
+
+**Usage:** Verify module exports and imports work
+
+---
+
+### ES6 Import Resolution
+
+```bash
+npm run typecheck 2>&1 | grep "Cannot find module"
+```
+**Expected:** No matches (all imports resolve)
+
+---
+
+### Specific Export Validation
+
+```bash
+node -e "const { Export } = require('./path'); console.log(typeof Export);"
+```
+**Expected:** Output shows type (function, object, string, etc.)
+
+**Usage:** Verify specific export exists and is correct type
+
+---
+
+## Line Count Validation
+
+### Single File Line Count
+
+```bash
+wc -l path/to/file.ts
+```
+**Expected:** ≤50 lines (Small task) or specified limit
+
+**Usage:** Verify task size constraint
+
+---
+
+### Multiple Files Total
+
+```bash
+wc -l file1.ts file2.ts file3.ts | tail -n 1
+```
+**Expected:** Total ≤50 (Small), ≤150 (Medium), ≤500 (Large)
+
+**Usage:** Verify total task size across all files
+
+---
+
+### Non-Blank Line Count
+
+```bash
+grep -v "^[[:space:]]*$" file.ts | wc -l
+```
+**Expected:** More accurate count excluding blank lines
+
+---
+
+## Export Validation
+
+### Module Exports Correctly
+
+```bash
+node -e "const mod = require('./path'); console.log(Object.keys(mod));"
+```
+**Expected:** Lists exported names
+
+**Usage:** Verify all expected exports present
+
+---
+
+### TypeScript Type Exports
+
+```bash
+grep "^export type" path/to/types.ts
+```
+**Expected:** Matches found for each type definition
+
+---
+
+### Index File Re-Exports
+
+```bash
+grep "^export.*from" path/to/index.ts
+```
+**Expected:** Matches found for re-exported modules
+
+---
+
+## Requirements Format Validation
+
+### All Requirements Follow Given/Should
+
+```bash
+grep "^- Given .*, should " task-file.md | wc -l
+```
+**Expected:** Count matches total number of requirements
+
+**Usage:** Verify requirements use correct template
+
+---
+
+### No Markdown Formatting in Requirements
+
+```bash
+grep "^\*\*Given\*\*" task-file.md
+```
+**Expected:** No matches
+
+**Usage:** Verify requirements use plain text, not markdown bold
+
+---
+
+## Code Example Pattern Validation
+
+### Examples Use Early Returns (No Else)
+
+```bash
+grep " else " task-file.md
+```
+**Expected:** No matches in code examples (may appear in prose)
+
+**Usage:** Verify code examples follow ControlFlowConstraints
+
+---
+
+### Examples Use Easel (No Custom CSS)
+
+```bash
+grep "style={{" task-file.md
+```
+**Expected:** No matches in code examples
+
+**Usage:** Verify examples follow DesignSystemConstraints
+
+---
+
+### Examples Use Correct Imports
+
+```bash
+grep "from '@canva/ui/[^']*'" task-file.md
+```
+**Expected:** Individual imports found (not barrel imports)
+
+**Usage:** Verify import examples are tree-shakeable
+
+---
+
+## Success Criteria Objectivity Check
+
+### No Subjective Terms
+
+```bash
+grep -A 100 "## Success Criteria" task-file.md | \
+  grep -i -E "distinct|clean|proper|appropriate|nice|elegant|suitable|good|better|improved|correct|well-|optimal|comprehensive|intuitive|professional"
+```
+**Expected:** No matches (empty output)
+
+**Usage:** Verify all criteria are objective
+
+**If matches found:** Replace each term using subjective language reference table
+
+---
+
+### All Criteria Have Validation Commands (In ValidationScripts Section)
+
+```bash
+# Count success criteria
+CRITERIA=$(grep -A 100 "## Success Criteria" task.md | grep -c "^- \[ \]")
+
+# Count validations in ValidationScripts section
+VALIDATIONS=$(grep -A 200 "## Validation Scripts" task.md | grep -c "^**Validation [0-9]*:")
+
+# Verify sufficient validations
+[ $VALIDATIONS -ge $CRITERIA ] || echo "ERROR: Not enough validations ($VALIDATIONS < $CRITERIA)"
+```
+**Expected:** No "ERROR" output (validations ≥ criteria)
+
+**Usage:** Verify each criterion can be validated
+
+---
+
+### ValidationScripts Section is Separate
+
+```bash
+# Check that Success Criteria section doesn't contain bash blocks
+grep -A 100 "## Success Criteria" task.md | \
+  grep -B 1 "## Validation Scripts" | \
+  grep "```bash"
+```
+**Expected:** Exit code 1 (no bash blocks found between sections)
+
+**Usage:** Verify proper separation of criteria and validations
+
+---
+
+## Agent Orchestration Validation
+
+### Complexity Assessment Completed
+
+```bash
+grep "Multiple Technical Domains:\|Specialized Knowledge:" task-file.md
+```
+**Expected:** Both sections present with checkboxes
+
+**Usage:** Verify systematic agent assessment completed
+
+---
+
+### Orchestration Logic Correct
+
+```bash
+# Count checked domains
+DOMAINS=$(grep -A 10 "Multiple Technical Domains" task.md | grep -c "\[x\]")
+
+# Count checked specializations
+SPECS=$(grep -A 10 "Specialized Knowledge" task.md | grep -c "\[x\]")
+
+# Verify logic
+if [ $DOMAINS -ge 2 ] || [ $SPECS -ge 2 ]; then
+  grep -q "Orchestration Required: YES" task.md || echo "ERROR: Should be YES (domains=$DOMAINS, specs=$SPECS)"
+else
+  grep -q "Orchestration Required: NO" task.md || echo "ERROR: Should be NO"
+fi
+```
+**Expected:** No "ERROR" output
+
+**Usage:** Verify agent orchestration decision matches criteria
+
+---
+
+### Dispatch Command Present (If Required)
+
+```bash
+if grep -q "Orchestration Required: YES" task.md; then
+  grep -q "cursor-agent" task.md || echo "ERROR: Missing dispatch command"
+fi
+```
+**Expected:** No "ERROR" output
+
+**Usage:** Verify dispatch command provided when orchestration required
+
+---
+
+## Implementation Step Size Check
+
+### Count Lines in Each Step
+
+```bash
+# Extract step code block and count lines
+grep -A 30 "**Step 1:" task.md | \
+  awk '/```typescript/,/```/' | \
+  grep -v "```" | \
+  wc -l
+```
+**Expected:** ≤20 lines
+
+**Usage:** Verify individual step size compliance
+
+---
+
+### Verify All Steps Are Sized Correctly
+
+```bash
+# For each step, check size
+for step_num in {1..8}; do
+  LINES=$(grep -A 30 "**Step $step_num:" task.md | \
+    awk '/```/,/```/' | grep -v "```" | wc -l)
+  if [ $LINES -gt 20 ]; then
+    echo "ERROR: Step $step_num has $LINES lines (exceeds 20 line limit)"
+  fi
+done
+```
+**Expected:** No "ERROR" output
+
+**Usage:** Validate all implementation steps meet size constraint
+
+---
+
+## Task Definition Quality Validation
+
+### Mandatory Section Presence Check
+
+**Check all mandatory sections exist:**
+```bash
+for section in "CodeContext" "StyleGuides" "State Management Strategy" "Validation Scripts" "Success Criteria" "Requirements"; do
+  grep -q "## $section" task.md || echo "MISSING: $section"
+done
+```
+**Expected:** No "MISSING" output
+
+**Usage:** Validate task before presenting to user
+
+---
+
+### Complete Task Quality Validation Suite
+
+**Run all quality checks in sequence:**
+```bash
+#!/bin/bash
+# Task Quality Validation Script - Complete Suite
+
+TASK_FILE=$1
+ERRORS=0
+
+echo "🔍 Validating task: $TASK_FILE"
+echo ""
+
+# Check 1: Mandatory sections
+echo "Check 1: Mandatory sections..."
+for section in "CodeContext" "StyleGuides" "State Management Strategy" "Validation Scripts"; do
+  if ! grep -q "## $section" "$TASK_FILE"; then
+    echo "  ❌ MISSING: $section"
+    ERRORS=$((ERRORS + 1))
+  else
+    echo "  ✅ Found: $section"
+  fi
+done
+
+# Check 2: Subjective language in Success Criteria
+echo ""
+echo "Check 2: Subjective language..."
+SUBJECTIVE=$(grep -A 100 "## Success Criteria" "$TASK_FILE" | \
+  grep -i -E "distinct|clean|proper|appropriate|nice|elegant|suitable|good|better|improved|correct|well-|optimal|comprehensive|intuitive|professional" | \
+  wc -l)
+if [ $SUBJECTIVE -gt 0 ]; then
+  echo "  ❌ Found $SUBJECTIVE subjective terms in success criteria:"
+  grep -A 100 "## Success Criteria" "$TASK_FILE" | \
+    grep -i -E "distinct|clean|proper|appropriate|nice|elegant|suitable|good|better" | \
+    head -n 3
+  ERRORS=$((ERRORS + 1))
+else
+  echo "  ✅ No subjective language found"
+fi
+
+# Check 3: ValidationScripts separate from Success Criteria
+echo ""
+echo "Check 3: ValidationScripts section format..."
+if ! grep -q "## Validation Scripts" "$TASK_FILE"; then
+  echo "  ❌ MISSING: Validation Scripts section"
+  ERRORS=$((ERRORS + 1))
+else
+  # Check that Success Criteria doesn't have bash blocks
+  EMBEDDED=$(grep -A 100 "## Success Criteria" "$TASK_FILE" | \
+    grep -B 1 "## Validation Scripts" | \
+    grep -c "```bash")
+  if [ $EMBEDDED -gt 0 ]; then
+    echo "  ❌ ValidationScripts embedded in Success Criteria (should be separate)"
+    ERRORS=$((ERRORS + 1))
+  else
+    echo "  ✅ ValidationScripts properly separated"
+  fi
+fi
+
+# Check 4: Sufficient validations for criteria
+echo ""
+echo "Check 4: Validation coverage..."
+CRITERIA=$(grep -A 100 "## Success Criteria" "$TASK_FILE" | grep -c "^- \[ \]")
+VALIDATIONS=$(grep -A 200 "## Validation Scripts" "$TASK_FILE" | grep -c "^**Validation [0-9]*:")
+
+if [ $VALIDATIONS -lt $CRITERIA ]; then
+  echo "  ⚠️  Only $VALIDATIONS validations for $CRITERIA criteria (should be at least equal)"
+  # Not a hard error, just a warning
+else
+  echo "  ✅ Sufficient validations ($VALIDATIONS for $CRITERIA criteria)"
+fi
+
+# Check 5: Agent orchestration logic
+echo ""
+echo "Check 5: Agent orchestration logic..."
+DOMAINS=$(grep -A 10 "Multiple Technical Domains" "$TASK_FILE" | grep -c "\[x\]")
+SPECS=$(grep -A 10 "Specialized Knowledge" "$TASK_FILE" | grep -c "\[x\]")
+
+echo "  Domains checked: $DOMAINS"
+echo "  Specializations checked: $SPECS"
+
+if [ $DOMAINS -ge 2 ] || [ $SPECS -ge 2 ]; then
+  if grep -q "Orchestration Required: YES" "$TASK_FILE"; then
+    echo "  ✅ Orchestration: YES (correct - 2+ domains or specs)"
+    # Verify dispatch command present
+    if ! grep -q "cursor-agent" "$TASK_FILE"; then
+      echo "  ❌ Missing dispatch command (required when Orchestration = YES)"
+      ERRORS=$((ERRORS + 1))
+    fi
+  else
+    echo "  ❌ Orchestration: Should be YES (has $DOMAINS domains, $SPECS specs)"
+    ERRORS=$((ERRORS + 1))
+  fi
+else
+  if grep -q "Orchestration Required: NO" "$TASK_FILE"; then
+    echo "  ✅ Orchestration: NO (correct - <2 domains and specs)"
+  else
+    echo "  ⚠️  Orchestration: Marked as YES but doesn't meet criteria"
+  fi
+fi
+
+# Summary
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+if [ $ERRORS -eq 0 ]; then
+  echo "✅ Task validation PASSED - Ready for user approval"
+  echo ""
+  exit 0
+else
+  echo "❌ Task validation FAILED with $ERRORS errors"
+  echo ""
+  echo "Action Required: Apply auto-revision rules or manual fixes"
+  exit 1
+fi
+```
+
+**Usage:**
+```bash
+bash validate-task.sh aidd-tasks/task-1-app-video-card-structure.md
+```
+
+**Save as:** `scripts/validate-task.sh` and make executable
+
+---
+
+## Step Size Validation
+
+### Single Step Line Count
+
+```bash
+# Count lines in specific step code block
+grep -A 30 "**Step 1:" task.md | \
+  awk '/```typescript/,/```/' | \
+  grep -v "```" | \
+  wc -l
+```
+**Expected:** ≤20 lines
+
+**Usage:** Verify individual step size
+
+---
+
+### All Steps Size Validation
+
+```bash
+# Check all steps are ≤20 lines
+for step_num in {1..8}; do
+  LINES=$(grep -A 30 "**Step $step_num:" task.md 2>/dev/null | \
+    awk '/```/,/```/' | grep -v "```" | wc -l)
+
+  if [ $LINES -gt 0 ] && [ $LINES -gt 20 ]; then
+    echo "Step $step_num: $LINES lines (EXCEEDS 20)"
+  fi
+done
+```
+**Expected:** No "EXCEEDS" output
+
+**Usage:** Validate all steps meet size constraint
+
+---
+
+## Task Quality Validation Commands
+
+### Mandatory Sections Check
+
+```bash
+#!/bin/bash
+# Check all mandatory sections present
+
+REQUIRED="CodeContext StyleGuides State_Management_Strategy Validation_Scripts Success_Criteria Requirements"
+
+for section in $REQUIRED; do
+  SECTION_NAME=$(echo "$section" | tr '_' ' ')
+  if ! grep -q "## $SECTION_NAME" task.md; then
+    echo "MISSING: $SECTION_NAME"
+  fi
+done
+```
+**Expected:** No "MISSING" output
+
+---
+
+### Subjective Language Detection
+
+```bash
+#!/bin/bash
+# Detect subjective language in success criteria
+
+SUBJECTIVE_TERMS="distinct clean proper appropriate nice elegant suitable good better improved correct well- optimal comprehensive intuitive professional"
+
+echo "Checking for subjective language..."
+
+for term in $SUBJECTIVE_TERMS; do
+  MATCHES=$(grep -A 100 "## Success Criteria" task.md | grep -i "$term")
+  if [ -n "$MATCHES" ]; then
+    echo "FOUND: $term in success criteria"
+    echo "  $MATCHES"
+  fi
+done
+```
+**Expected:** No "FOUND:" output
+
+---
+
+### ValidationScripts Format Check
+
+```bash
+#!/bin/bash
+# Verify ValidationScripts is separate section with proper format
+
+# Check section exists
+if ! grep -q "## Validation Scripts" task.md; then
+  echo "ERROR: Missing Validation Scripts section"
+  exit 1
+fi
+
+# Check Success Criteria doesn't contain bash blocks
+EMBEDDED=$(grep -A 100 "## Success Criteria" task.md | \
+  grep -B 1 "## Validation Scripts" | \
+  grep -c "```bash")
+
+if [ $EMBEDDED -gt 0 ]; then
+  echo "ERROR: ValidationScripts embedded in Success Criteria (should be separate)"
+  exit 1
+fi
+
+# Check ValidationScripts has numbered validations
+VALIDATIONS=$(grep -A 200 "## Validation Scripts" task.md | grep -c "^**Validation [0-9]*:")
+
+if [ $VALIDATIONS -eq 0 ]; then
+  echo "ERROR: No numbered validations in ValidationScripts section"
+  exit 1
+fi
+
+echo "✅ ValidationScripts properly formatted with $VALIDATIONS validations"
+```
+
+---
+
+### Agent Orchestration Logic Check
+
+```bash
+#!/bin/bash
+# Verify agent orchestration decision matches criteria
+
+DOMAINS=$(grep -A 10 "Multiple Technical Domains" task.md | grep -c "\[x\]")
+SPECS=$(grep -A 10 "Specialized Knowledge" task.md | grep -c "\[x\]")
+
+echo "Domains: $DOMAINS, Specializations: $SPECS"
+
+# Apply decision logic
+if [ $DOMAINS -ge 2 ] || [ $SPECS -ge 2 ]; then
+  EXPECTED="YES"
+else
+  EXPECTED="NO"
+fi
+
+# Check actual value
+if grep -q "Orchestration Required: $EXPECTED" task.md; then
+  echo "✅ Orchestration decision correct: $EXPECTED"
+else
+  echo "❌ Orchestration decision wrong (should be $EXPECTED based on $DOMAINS domains, $SPECS specs)"
+  exit 1
+fi
+
+# If YES, verify dispatch command present
+if [ "$EXPECTED" = "YES" ]; then
+  if ! grep -q "cursor-agent" task.md; then
+    echo "❌ Missing dispatch command (required when Orchestration = YES)"
+    exit 1
+  fi
+fi
+```
+
+---
+
+### Complete Pre-Flight Validation Script
+
+```bash
+#!/bin/bash
+# Complete Pre-Flight Validation Gate
+# Run all validation checks before presenting task to user
+
+TASK_FILE=$1
+ERRORS=0
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🚀 Pre-Flight Validation Gate"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Check 1: Mandatory sections present
+echo "✓ Check 1: Mandatory sections..."
+for section in "CodeContext" "StyleGuides" "State Management Strategy" "Validation Scripts"; do
+  if ! grep -q "## $section" "$TASK_FILE"; then
+    echo "  ❌ MISSING: $section"
+    ERRORS=$((ERRORS + 1))
+  fi
+done
+
+# Check 2: No subjective language
+echo ""
+echo "✓ Check 2: Subjective language..."
+SUBJECTIVE=$(grep -A 100 "## Success Criteria" "$TASK_FILE" | \
+  grep -i -E "distinct|clean|proper|appropriate|nice|elegant|suitable|good|better|improved|correct|well-|optimal|comprehensive|intuitive|professional" | \
+  wc -l)
+
+if [ $SUBJECTIVE -gt 0 ]; then
+  echo "  ❌ Found $SUBJECTIVE subjective terms:"
+  grep -A 100 "## Success Criteria" "$TASK_FILE" | \
+    grep -i -E "distinct|clean|proper|appropriate" | head -n 3
+  ERRORS=$((ERRORS + 1))
+fi
+
+# Check 3: ValidationScripts separate section
+echo ""
+echo "✓ Check 3: ValidationScripts format..."
+if ! grep -q "## Validation Scripts" "$TASK_FILE"; then
+  echo "  ❌ MISSING: Validation Scripts section"
+  ERRORS=$((ERRORS + 1))
+else
+  EMBEDDED=$(grep -A 100 "## Success Criteria" "$TASK_FILE" | \
+    grep -B 1 "## Validation Scripts" | \
+    grep -c "```bash")
+  if [ $EMBEDDED -gt 0 ]; then
+    echo "  ❌ Validations embedded in Success Criteria (should be separate)"
+    ERRORS=$((ERRORS + 1))
+  fi
+fi
+
+# Check 4: Step sizes ≤20 lines
+echo ""
+echo "✓ Check 4: Implementation step sizes..."
+OVERSIZED=0
+for step_num in {1..8}; do
+  LINES=$(grep -A 30 "**Step $step_num:" "$TASK_FILE" 2>/dev/null | \
+    awk '/```/,/```/' | grep -v "```" | wc -l)
+
+  if [ $LINES -gt 20 ]; then
+    echo "  ❌ Step $step_num: $LINES lines (exceeds 20 line limit)"
+    OVERSIZED=$((OVERSIZED + 1))
+  fi
+done
+
+if [ $OVERSIZED -gt 0 ]; then
+  ERRORS=$((ERRORS + 1))
+fi
+
+# Check 5: Agent orchestration logic
+echo ""
+echo "✓ Check 5: Agent orchestration logic..."
+DOMAINS=$(grep -A 10 "Multiple Technical Domains" "$TASK_FILE" 2>/dev/null | grep -c "\[x\]")
+SPECS=$(grep -A 10 "Specialized Knowledge" "$TASK_FILE" 2>/dev/null | grep -c "\[x\]")
+
+if [ $DOMAINS -ge 2 ] || [ $SPECS -ge 2 ]; then
+  if ! grep -q "Orchestration Required: YES" "$TASK_FILE"; then
+    echo "  ❌ Should be YES (domains=$DOMAINS, specs=$SPECS)"
+    ERRORS=$((ERRORS + 1))
+  else
+    # Verify dispatch command
+    if ! grep -q "cursor-agent" "$TASK_FILE"; then
+      echo "  ❌ Missing dispatch command"
+      ERRORS=$((ERRORS + 1))
+    fi
+  fi
+fi
+
+# Summary
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+if [ $ERRORS -eq 0 ]; then
+  echo "✅ PRE-FLIGHT VALIDATION PASSED"
+  echo ""
+  echo "Task is ready for user approval and AI execution"
+  exit 0
+else
+  echo "❌ PRE-FLIGHT VALIDATION FAILED"
+  echo ""
+  echo "Errors found: $ERRORS"
+  echo "Action: Apply auto-revision rules or request manual fixes"
+  exit 1
+fi
+```
+
+**Save as:** `scripts/pre-flight-validation.sh`
+
+**Usage:**
+```bash
+bash scripts/pre-flight-validation.sh aidd-tasks/task-1-app-video-card-structure.md
+```
+
+**Integration:**
+Call this script in `createPlan()` before presenting task to user

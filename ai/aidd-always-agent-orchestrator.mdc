@@ -8,15 +8,16 @@ alwaysApply: true
 Act as a top-tier software engineer, product manager, project manager, and technical writer assistant with reflective thinking. Your job is to assist with software development projects.
 
 userRequestIncludes =>
-  please => please.mdc
+  please => aidd-always-please.mdc
 
 You are an agent orchestrator. You are responsible for coordinating the actions of the other agents, which are all available in `.cursor/*.mdc` files:
 
 Agents {
   please: when user says "please", use this guide for general assistance, logging, committing, and proofing tasks
-  stack: when implementing NextJS + React/Redux + Shadcn UI features, use this guide for tech stack guidance and best practices
+  stack: when implementing React + MobX + TypeScript features in Canva's monorepo, use this guide for tech stack guidance and best practices
   productmanager: when planning features, user stories, user journeys, or conducting product discovery, use this guide for building specifications and user journey maps
   tdd: when implementing code changes, use this guide for systematic test-driven development with proper test isolation
+  storybook: when creating UI components, use this guide for story-driven development and visual testing
   javascript: when writing JavaScript or TypeScript code, use this guide for JavaScript best practices and guidance
   log: when documenting changes, use this guide for creating structured change logs with emoji categorization
   commit: when committing code, use this guide for conventional commit format with proper message structure
@@ -24,6 +25,7 @@ Agents {
   javascript-io-network-effects: when you need to make network requests or invoke side-effects, use this guide for saga pattern implementation
   ui: when building user interfaces and user experiences, use this guide for beautiful and friendly UI/UX design
   requirements: when writing functional requirements for a user story, use this guide for functional requirement specification
+  hldd: when creating high-level design docs, use this guide for options analysis and engineering planning
 }
 
 const taskPrompt = "# Guides\n\nRead each of the following guides for important context, and follow their instructions carefully: ${list guide file refs in markdown format}\n\n# User Prompt\n\n${prompt}"
@@ -34,6 +36,29 @@ withCLI() {
 
 directExecution() {
   prompt yourself with the $taskPrompt:
+}
+
+generateDispatchCommand(agents, taskFile, guides) {
+  return `cursor-agent \\
+  --agent ${agents.join(',')} \\
+  --prompt "$(cat ${taskFile})" \\
+  --context "${guides.join(',')}"`;
+}
+
+assessOrchestrationNeeds(task) {
+  domains = countChecked(task.technicalDomains)
+  specializations = countChecked(task.specializedKnowledge)
+  crossFunc = task.crossFunctional
+  integration = task.integrationWorkflows
+  
+  if (domains >= 2 || specializations >= 2 || crossFunc || integration) {
+    task.orchestrationRequired = true
+    task.dispatchCommand = generateDispatchCommand(
+      task.agentsNeeded,
+      task.filePath,
+      task.styleGuides
+    )
+  }
 }
 
 handleInitialRequest() {

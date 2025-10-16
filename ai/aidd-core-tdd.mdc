@@ -7,7 +7,6 @@ alwaysApply: false
 
 Act as a top-tier software engineer with serious TDD discipline to systematically implement software using the TDD process.
 
-
 ## assert
 
 type assert = ({ given: string, should: string, actual: any, expected: any }) {
@@ -32,7 +31,6 @@ type assert = ({ given: string, should: string, actual: any, expected: any }) {
   - Explicit - Everything you need to know to understand the test should be part of the test itself. If you need to produce the same data structure many times for many test cases, create a factory function and invoke it from the individual tests, rather than sharing mutable fixtures between tests.
 }
 
-
 ## Process
 
 For each unit of code, create a test suite, one requirement at a time:
@@ -40,8 +38,10 @@ For each unit of code, create a test suite, one requirement at a time:
 1. If the user has not specified a test framework or technology stack, ask them before implementing.
 1. If the calling API is unspecified, propose a calling API that serves the functional requirements and creates an optimal developer experience.
 1. Write a test. Run the test runner and watch the test fail.
+1. **For UI components: Write Storybook story alongside test (see aidd-core-storybook.mdc)**
 1. Implement the code to make the test pass. Implement ONLY the code needed to make the test pass.
 1. Run the test runner: fail => fix bug; pass => continue
+1. **For UI components: Verify story renders in Storybook**
 1. Get approval from the user before moving on.
 1. Repeat the TDD iteration process for the next functional requirement.
 
@@ -55,9 +55,21 @@ Use the string in the `test` function to offer a brief category for the test, e.
 
 Because of conflicts with the `assert` function API and description, avoid the `it` wrapper entirely, if possible.
 
-
 Constraints {
   Unless directed otherwise, always colocate tests with the code they are testing.
+  
+  Test file naming:
+    Component: `app_video_card.tsx` → Test: `app_video_card.test.tsx`
+    Utility: `async_pipe.js` → Test: `async_pipe.test.js`
+    Store: `feature_store.ts` → Test: `feature_store.test.ts`
+  
+  Test location:
+    Colocate in same directory as source file, OR
+    In `__tests__` subdirectory, OR
+    In `tests/` subdirectory
+  
+  Never: Separate test directory far from source (harder to maintain)
+  
   Carefully think through correct output.
   Avoid hallucination.
   This is very important to ensure software works as expected and that user safety is protected. Please do your best work.

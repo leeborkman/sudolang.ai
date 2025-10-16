@@ -1,0 +1,843 @@
+---
+description: Guide for writing AI-executable task definitions with objective criteria and explicit instructions
+alwaysApply: false
+---
+
+# AI Task Writing Guide
+
+Best practices for writing task definitions that AI tools can execute successfully on first attempt.
+
+---
+
+## Core Principles
+
+1. **Objective Over Subjective** - AI can validate "≤50 lines" but not "clean code"
+2. **Explicit Over Implicit** - AI needs exact code, not "integrate appropriately"
+3. **Validatable Over Aspirational** - Every criterion needs validation command
+4. **Incremental Over Big-Bang** - Validate after each step, not just at end
+5. **Referenced Over Assumed** - Show actual code, don't assume AI knows your codebase
+
+---
+
+## Principle 1: Objective Over Subjective
+
+AI cannot validate subjective criteria. Replace with objectively measurable criteria.
+
+## Comprehensive Subjective Language Reference
+
+**Forbidden Terms with Objective Replacements:**
+
+| Subjective Term | Why It's Bad | Objective Replacement Example |
+|----------------|--------------|-------------------------------|
+| "distinct visual design" | Can't measure "distinct" | "Uses background='secondary' for container vs background='primary' in parent" <br> Validation: `grep 'background="secondary"' file.tsx` |
+| "clean hierarchy" | Subjective aesthetics | "Heading uses size='large', body uses size='small'" <br> Validation: `grep 'size="large"' file.tsx` |
+| "proper structure" | Undefined standard | "Uses Box > Stack > Text nesting pattern" <br> Validation: `grep -A 3 "<Box" file.tsx \| grep "<Stack"` |
+| "appropriate spacing" | Undefined spacing | "Uses space='medium' token from Easel" <br> Validation: `grep 'space="medium"' file.tsx` |
+| "well-organized code" | Subjective organization | "Maximum 3 nesting levels in functions" <br> Validation: `awk nesting depth check ≤3` |
+| "good performance" | Undefined benchmark | "Component renders in <50ms" <br> Validation: `npm run test:perf -- ComponentName` |
+| "elegant solution" | Aesthetic judgment | "Function is ≤30 lines with no nested conditionals" <br> Validation: `wc -l ≤30 && !grep nested` |
+| "properly exported" | Undefined correctness | "Component exports via index.ts with named export" <br> Validation: `grep 'export { Component }' index.ts` |
+| "correctly implemented" | Circular definition | "All functional requirements have passing tests" <br> Validation: `npm run test -- 6 passing` |
+| "suitable approach" | Subjective suitability | "Uses early returns with no else blocks" <br> Validation: `!grep ' else ' file.ts` |
+| "intuitive UX" | User perception | "Tab order matches visual top-to-bottom order" <br> Validation: Manual tab navigation test |
+| "professional appearance" | Aesthetic judgment | "Uses Easel color tokens (primary/secondary/tertiary)" <br> Validation: `grep 'color="primary\|secondary"' file.tsx` |
+| "optimal configuration" | Undefined optimality | "Autoplay=false, mute=true per performance guidelines" <br> Validation: `grep 'autoplay={false}' file.tsx` |
+| "comprehensive coverage" | Undefined scope | "90%+ test coverage measured by coverage tool" <br> Validation: `npm run test:coverage -- ≥90%` |
+| "well-documented" | Subjective quality | "JSDoc on all exported functions (count matches exports)" <br> Validation: `grep '/\*\*' count == export count` |
+
+**Automated Detection:**
+```bash
+# Check for ANY subjective terms in success criteria
+grep -A 100 "## Success Criteria" task.md | \
+  grep -i -E "distinct|clean|proper|appropriate|nice|elegant|suitable|good|better|improved|correct|well-|optimal|comprehensive|intuitive|professional"
+```
+
+**If matches found:**
+1. Identify each subjective term
+2. Look up objective replacement in table above
+3. Rewrite criterion with specific measurement
+4. Add corresponding validation to ValidationScripts section
+5. Re-run check until no matches
+
+### Example 1: Component Design Quality
+
+**❌ Subjective (AI cannot validate):**
+```markdown
+## Success Criteria
+- [ ] Component has clean design
+- [ ] Visual hierarchy is clear
+- [ ] Layout is intuitive
+- [ ] Styling is consistent
+```
+
+**✅ Objective (AI can validate):**
+```markdown
+## Success Criteria
+
+- [ ] Component uses Box from Easel for container (not custom div)
+- [ ] Heading uses Text component with size="large" and weight="bold"
+- [ ] Body uses Text component with size="small" and color="secondary"
+- [ ] Two-column layout uses Columns component with width="3/5" and width="2/5"
+- [ ] No custom CSS files (.css) in component directory
+- [ ] All color values use Easel tokens (primary/secondary/tertiary)
+
+## Validation Scripts
+
+**Validation 1: Easel Box Usage**
+```bash
+grep "import { Box } from '@canva/ui/box'" component.tsx
+```
+Expected: Match found
+
+**Validation 2: Typography Hierarchy**
+```bash
+grep 'size="large"' component.tsx && grep 'size="small"' component.tsx
+```
+Expected: Both matches found
+
+**Validation 3: Column Layout**
+```bash
+grep 'width="3/5"' component.tsx && grep 'width="2/5"' component.tsx
+```
+Expected: Both matches found
+
+**Validation 4: No Custom CSS**
+```bash
+find component-dir/ -name "*.css"
+```
+Expected: No files found (empty output)
+
+**Validation 5: Easel Color Tokens**
+```bash
+grep 'color="primary\|secondary\|tertiary"' component.tsx
+```
+Expected: Matches found (no hex colors like #ffffff)
+```
+
+---
+
+### Example 2: Code Quality Assessment
+
+**❌ Subjective:**
+```markdown
+- [ ] Code follows best practices
+- [ ] Implementation is elegant
+- [ ] Function is well-structured
+```
+
+**✅ Objective:**
+```markdown
+## Success Criteria
+
+- [ ] No else blocks used (early returns only per ControlFlowConstraints)
+- [ ] Function implementation is ≤20 lines
+- [ ] Maximum nesting depth is ≤3 levels
+- [ ] All imports use individual paths (no barrel imports from '@canva/ui')
+
+## Validation Scripts
+
+**Validation 1: No Else Blocks**
+```bash
+grep " else " file.ts
+```
+Expected: No matches (empty output)
+
+**Validation 2: Function Length**
+```bash
+wc -l file.ts
+```
+Expected: ≤20 lines
+
+**Validation 3: Nesting Depth**
+```bash
+awk '{print gsub(/\t/, "")}' file.ts | sort -rn | head -n 1
+```
+Expected: ≤3
+
+**Validation 4: Individual Imports**
+```bash
+grep "from '@canva/ui'" file.tsx
+```
+Expected: No matches (only individual paths like '@canva/ui/box')
+```
+
+---
+
+### Example 3: Performance Assessment
+
+**❌ Subjective:**
+```markdown
+- [ ] Component is performant
+- [ ] Function is fast enough
+- [ ] Loads quickly
+```
+
+**✅ Objective:**
+```markdown
+## Success Criteria
+
+- [ ] Component renders in <50ms on average
+- [ ] Function completes in <100ms for input size ≤1000 items
+- [ ] Initial bundle size increase is <10KB
+- [ ] No layout shift (CLS score <0.1)
+
+## Validation Scripts
+
+**Validation 1: Render Performance**
+```bash
+npm run test:perf -- ComponentName
+```
+Expected: "avg render: <50ms" in output
+
+**Validation 2: Function Performance**
+```bash
+npm run test -- functionPerformance.test.ts
+```
+Expected: Test passes with timing assertion <100ms
+
+**Validation 3: Bundle Size**
+```bash
+npm run build:analyze -- --compare
+```
+Expected: Size increase shown as "+8.2KB" or less
+
+**Validation 4: Layout Shift**
+```bash
+npm run lighthouse -- --only-categories=performance
+```
+Expected: CLS score <0.1
+```
+
+---
+
+## Principle 2: Explicit Over Implicit
+
+AI cannot infer context or "figure out" details. Show exact code AI should write.
+
+### Example 1: Component Integration
+
+**❌ Implicit (AI must guess):**
+```markdown
+**Implementation:**
+- Integrate YoutubePlayer component with appropriate settings
+- Follow design system conventions
+- Use TypeScript properly
+```
+
+**✅ Explicit (AI knows exactly what to do):**
+```markdown
+## Required Imports (EXACT PATHS)
+
+```typescript
+// Video Player - YouTube integration
+import { YoutubePlayer } from 'ui/tailoring/ui/video/youtube_player/youtube_player';
+import type { YouTubeVideoPlayerTarget } from 'ui/tailoring/ui/video/youtube_player/youtube_player';
+
+// Easel Design System - Individual imports
+import { Box } from '@canva/ui/box';
+import { Columns, Column } from '@canva/ui/columns';
+```
+
+## Implementation Steps
+
+**Step 1: Import YoutubePlayer** (5 lines)
+```typescript
+// File: app_video_card.tsx
+// Add to top of file with other imports:
+
+import { YoutubePlayer } from 'ui/tailoring/ui/video/youtube_player/youtube_player';
+import type { YouTubeVideoPlayerTarget } from 'ui/tailoring/ui/video/youtube_player/youtube_player';
+```
+
+**Validation After Step 1:**
+```bash
+grep "YoutubePlayer" app_video_card.tsx
+npm run typecheck
+```
+Expected: Match found, 0 errors
+
+✅ **Checkpoint**
+
+---
+
+**Step 2: Use YoutubePlayer with Exact Configuration** (8 lines)
+```typescript
+// File: app_video_card.tsx
+// Inside video column, add:
+
+<YoutubePlayer
+  mode="inline"
+  videoId={videoId}
+  aspectRatio="16:9"
+  autoplay={false}
+  mute={true}
+/>
+```
+
+**Validation After Step 2:**
+```bash
+grep 'mode="inline"' app_video_card.tsx
+grep 'autoplay={false}' app_video_card.tsx
+```
+Expected: Both matches found
+
+✅ **Checkpoint**
+```
+
+---
+
+## Principle 3: Validatable Over Aspirational
+
+Every success criterion needs a command AI can execute to verify completion.
+
+### Example 1: Export Validation
+
+**❌ Not Validatable:**
+```markdown
+- [ ] Component properly exported
+- [ ] Module can be imported
+```
+
+**✅ Validatable:**
+```markdown
+## Success Criteria
+
+- [ ] Component exports from index.ts with named export
+- [ ] Component is importable without errors
+- [ ] TypeScript type definitions export correctly
+
+## Validation Scripts
+
+**Validation 1: Named Export**
+```bash
+grep "export { AppVideoCard }" index.ts
+```
+Expected: Match found
+
+**Validation 2: Import Success**
+```bash
+node -e "const { AppVideoCard } = require('./dist'); console.log(typeof AppVideoCard);"
+```
+Expected: Output "function"
+
+**Validation 3: Type Exports**
+```bash
+grep "export type AppVideoCardProps" types.ts
+```
+Expected: Match found
+```
+
+---
+
+### Example 2: Test Coverage
+
+**❌ Not Validatable:**
+```markdown
+- [ ] Tests are comprehensive
+- [ ] All scenarios covered
+```
+
+**✅ Validatable:**
+```markdown
+## Success Criteria
+
+- [ ] Test suite has ≥6 test cases (one per functional requirement)
+- [ ] Video rendering scenario has dedicated test
+- [ ] Non-video fallback scenario has dedicated test
+- [ ] All tests pass without failures
+
+## Validation Scripts
+
+**Validation 1: Test Count**
+```bash
+grep "describe\|it\|test(" test.ts | wc -l
+```
+Expected: ≥6
+
+**Validation 2: Video Rendering Test**
+```bash
+grep "when videoId is provided" test.ts
+```
+Expected: Match found
+
+**Validation 3: Fallback Test**
+```bash
+grep "when videoId is not provided" test.ts
+```
+Expected: Match found
+
+**Validation 4: All Tests Pass**
+```bash
+npm run test app_video_card
+```
+Expected: "6 passing", exit code 0
+```
+
+---
+
+## Principle 4: Incremental Over Big-Bang
+
+Break implementation into small steps with validation after each step.
+
+## Step Size Enforcement Examples
+
+### ❌ Step Too Large (>20 lines - violates framework)
+
+```markdown
+**Step 3: Add Complete Component Implementation** (70 lines)
+```typescript
+export const AppVideoCard: React.FC<Props> = (props) => {
+  const { videoId, title, iconUrl, heading, subheading, onClick } = props;
+
+  if (!videoId) {
+    return (
+      <BasicButton onClick={onClick}>
+        <Box padding="medium" background="primary">
+          <Columns spacing="small">
+            <Column width="content">
+              <StaticImage src={iconUrl} alt={title} />
+            </Column>
+            <Column>
+              <Stack space="small">
+                <Text size="large" weight="bold">{heading}</Text>
+                <Text size="small" color="secondary">{subheading}</Text>
+              </Stack>
+            </Column>
+          </Columns>
+        </Box>
+      </BasicButton>
+    );
+  }
+
+  return (
+    <BasicButton onClick={onClick}>
+      <Box padding="medium" background="secondary">
+        <Columns spacing="large">
+          <Column width="3/5">
+            <Box background="tertiary" padding="small">
+              <YoutubePlayer
+                mode="inline"
+                videoId={videoId}
+                aspectRatio="16:9"
+                autoplay={false}
+                mute={true}
+              />
+            </Box>
+          </Column>
+          <Column width="2/5">
+            <Stack space="small">
+              <StaticImage src={iconUrl} alt={title} />
+              <Text size="large" weight="bold">{heading}</Text>
+              <Text size="small" color="secondary">{subheading}</Text>
+            </Stack>
+          </Column>
+        </Columns>
+      </Box>
+    </BasicButton>
+  );
+};
+```
+```
+
+**Problems:**
+- 70 lines in one step (violates ≤20 line constraint)
+- AI can't validate incrementally
+- If early part wrong, wastes time on later parts
+- No checkpoint gates
+
+---
+
+### ✅ Step Properly Sized (≤20 lines each)
+
+```markdown
+**Step 3a: Add No-Video Early Return** (12 lines)
+```typescript
+// File: app_video_card.tsx
+// Add after const destructuring:
+
+if (!videoId) {
+  return (
+    <BasicButton onClick={onClick}>
+      <Box padding="medium" background="primary">
+        <Text>App info only - full implementation in step 3b</Text>
+      </Box>
+    </BasicButton>
+  );
+}
+```
+
+**Validation After Step 3a:**
+```bash
+grep "if (!videoId)" app_video_card.tsx
+wc -l app_video_card.tsx
+```
+Expected: Match found, ≤30 total lines so far
+
+✅ **Checkpoint:** Proceed to 3b ONLY if validation passes
+
+---
+
+**Step 3b: Add Video Section Container** (15 lines)
+```typescript
+// File: app_video_card.tsx
+// Add after early return:
+
+return (
+  <BasicButton onClick={onClick}>
+    <Box padding="medium" background="secondary">
+      <Columns spacing="large">
+        <Column width="3/5">
+          {/* Video in next step */}
+        </Column>
+        <Column width="2/5">
+          {/* App info in step after */}
+        </Column>
+      </Columns>
+    </Box>
+  </BasicButton>
+);
+```
+
+**Validation After Step 3b:**
+```bash
+grep 'width="3/5"' app_video_card.tsx
+grep 'background="secondary"' app_video_card.tsx
+```
+Expected: Both matches found
+
+✅ **Checkpoint:** Proceed to 3c ONLY if validation passes
+
+---
+
+**Step 3c: Add YoutubePlayer to Video Column** (10 lines)
+```typescript
+// File: app_video_card.tsx
+// Replace `{/* Video in next step */}` with:
+
+<Box background="tertiary" padding="small" borderRadius="medium">
+  <YoutubePlayer
+    mode="inline"
+    videoId={videoId}
+    aspectRatio="16:9"
+    autoplay={false}
+    mute={true}
+  />
+</Box>
+```
+
+**Validation After Step 3c:**
+```bash
+grep "YoutubePlayer" app_video_card.tsx
+grep 'background="tertiary"' app_video_card.tsx
+wc -l app_video_card.tsx
+```
+Expected: Both matches found, ≤55 total lines
+
+✅ **Checkpoint:** Proceed to 3d ONLY if validation passes
+
+---
+
+**Step 3d: Add App Info to Second Column** (18 lines)
+```typescript
+// File: app_video_card.tsx
+// Replace `{/* App info in step after */}` with:
+
+<Stack space="small">
+  <Box borderRadius="small" overflow="hidden">
+    <StaticImage src={iconUrl} alt={title} />
+  </Box>
+  <Text size="large" weight="bold" color={headingColor}>
+    {heading}
+  </Text>
+  <Text size="small" color="secondary">
+    {subheading}
+  </Text>
+</Stack>
+```
+
+**Validation After Step 3d:**
+```bash
+grep "StaticImage" app_video_card.tsx
+grep "<Stack space" app_video_card.tsx
+wc -l app_video_card.tsx
+```
+Expected: Both matches found, total lines ≤73 (within budget if types are separate file)
+
+✅ **Final Checkpoint**
+```
+
+**Benefits of Proper Sizing:**
+- Each step: 10-18 lines (easily digestible)
+- AI validates progress after each step
+- Failures caught immediately at source
+- Clear progression from simple to complete
+- Easy to debug which specific step failed
+
+---
+
+## Principle 5: Referenced Over Assumed
+
+Don't assume AI knows your codebase patterns. Show actual code from existing files.
+
+[Previous content retained - same as before]
+
+---
+
+## Success Criteria vs Validation Scripts Separation
+
+**Critical Concept:** These are TWO DIFFERENT THINGS that must be in separate sections.
+
+### Success Criteria Section
+**Purpose:** State WHAT must be true (human-readable goals)
+
+**Format:**
+```markdown
+## Success Criteria (OBJECTIVE ONLY - NO VALIDATION COMMANDS HERE)
+
+- [ ] Component uses Box from Easel for container
+- [ ] Props interface extends EditorialFeaturedAppProps
+- [ ] No else blocks used in conditional rendering
+- [ ] TypeScript compiles with 0 errors
+```
+
+**Rules:**
+- Describes WHAT must be true
+- No bash commands
+- No expected outputs
+- Objective statements only
+
+---
+
+### Validation Scripts Section
+**Purpose:** Specify HOW to verify it's true (machine-executable checks)
+
+**Format:**
+```markdown
+## Validation Scripts (MANDATORY - SEPARATE SECTION)
+
+**Validation 1: Easel Box Usage**
+```bash
+grep "import { Box } from '@canva/ui/box'" component.tsx
+```
+Expected: Match found
+
+**Validation 2: Props Extension**
+```bash
+grep "EditorialFeaturedAppProps &" types.ts
+```
+Expected: Match found
+
+**Validation 3: No Else Blocks**
+```bash
+grep " else " component.tsx
+```
+Expected: No matches
+
+**Validation 4: TypeScript Compilation**
+```bash
+npm run typecheck
+```
+Expected: "0 errors", exit code 0
+```
+
+**Rules:**
+- Maps to Success Criteria (one-to-one or many-to-one)
+- Includes bash commands
+- Specifies expected outputs
+- Numbered sequentially
+
+---
+
+### Why Separate?
+
+**Clarity:** Success Criteria readable by humans, Validation Scripts executable by machines
+**Maintenance:** Can update validation commands without changing criteria
+**Flexibility:** Same criterion can map to multiple validations
+**Organization:** Clear separation of concerns
+
+**Example Mapping:**
+```
+Success Criterion: "Component uses Easel components exclusively"
+
+Maps to 3 Validations:
+  1. Check Easel imports present
+  2. Check no .css files
+  3. Check no inline styles
+```
+
+---
+
+## Before/After Task Definition Examples
+
+[Previous examples retained, updated to show ValidationScripts separation]
+
+---
+
+## Common AI Failure Patterns & Fixes
+
+[Previous patterns retained - same as before]
+
+---
+
+## Task Definition Quality Checklist
+
+Use this before finalizing any task for user approval:
+
+### Mandatory Sections
+
+- [ ] CodeContext - with file paths, line numbers, code snippets
+- [ ] StyleGuides - with .mdc references and explicit DO/DON'T
+- [ ] State Management Strategy - for UI components (MobX YES/NO)
+- [ ] Requirements - using "Given [X], should [Y]" format
+- [ ] Success Criteria - OBJECTIVE statements only, NO validation commands
+- [ ] Validation Scripts - SEPARATE section mapping criteria to validations
+- [ ] Implementation Steps - with exact code for each step
+
+### Content Quality
+
+- [ ] No subjective terms in success criteria - Run check:
+  ```bash
+  grep -A 100 "## Success Criteria" task.md | \
+    grep -i -E "distinct|clean|proper|appropriate|nice|elegant|suitable|good|better"
+  ```
+  Expected: No matches
+
+- [ ] Validation Scripts separate from Success Criteria
+- [ ] Each success criterion maps to ≥1 validation
+- [ ] All code examples follow StyleGuide patterns
+- [ ] All imports have exact paths (no wildcards)
+- [ ] Task size ≤50 lines (or broken into sub-tasks)
+- [ ] Each implementation step ≤20 lines
+- [ ] Validation after each step
+- [ ] Expected outputs specified for all validations
+
+### AI Executability
+
+- [ ] Everything AI needs is explicit (no assumptions)
+- [ ] Can copy-paste code directly from task
+- [ ] Can copy-paste validation commands
+- [ ] Can verify completion objectively
+- [ ] No human judgment required at any step
+
+---
+
+## Red Flags in Task Definitions
+
+**If you see these, task needs revision:**
+
+🚩 Subjective terms in criteria: "distinct", "clean", "proper", "appropriate", "good", "nice", "elegant"
+🚩 Validation commands in Success Criteria section (belong in ValidationScripts)
+🚩 "Follow best practices" without specifics
+🚩 "Use appropriate settings" without exact values
+🚩 "Figure out", "determine", "choose" language
+🚩 Implementation step >20 lines
+🚩 Success criteria without mapping to ValidationScripts
+🚩 Code examples with custom CSS (if Easel required)
+🚩 Code examples with else blocks (if early returns required)
+🚩 Import paths missing or using wildcards
+🚩 No CodeContext section
+🚩 No StyleGuides section
+🚩 Task >50 lines without breakdown
+
+---
+
+## Green Flags in Task Definitions
+
+**These indicate AI-ready tasks:**
+
+✅ CodeContext with actual code snippets from existing files
+✅ StyleGuides with explicit DO/DON'T and code examples
+✅ Success Criteria with objective statements (WHAT must be true)
+✅ ValidationScripts as separate section (HOW to verify)
+✅ Each criterion maps to validation(s)
+✅ Exact code in implementation steps (≤20 lines each)
+✅ Validation after each step with expected outputs
+✅ Import paths are exact and complete
+✅ Task ≤50 lines or broken into sub-tasks
+✅ Requirements use "Given [X], should [Y]" format
+✅ No subjective language anywhere
+✅ State Management Strategy explicit (MobX YES/NO)
+
+---
+
+## Template for Quick Task Writing
+
+```markdown
+# Task X: [Specific Action in ≤50 Lines]
+
+[One-line description]
+
+## CodeContext (MANDATORY)
+
+**File:** `exact/path/file.ext` (Lines X-Y)
+```language
+[actual current code AI needs to see]
+```
+
+## StyleGuides (MANDATORY)
+
+**Mandatory:** `guide.mdc` - Section: [specific section]
+
+**Constraints:**
+✅ **DO:** [with code example]
+❌ **DON'T:** [with anti-pattern example]
+
+## State Management Strategy
+
+**MobX Required:** [YES/NO]
+**Justification:** [reason]
+
+## Requirements
+
+- Given [situation], should [action]
+
+## Success Criteria (OBJECTIVE - NO VALIDATIONS HERE)
+
+- [ ] [Objective statement of WHAT must be true]
+- [ ] [Another objective statement]
+
+## Validation Scripts (SEPARATE SECTION)
+
+**Validation 1: [Maps to criterion 1]**
+```bash
+[command]
+```
+Expected: [output]
+
+**Validation 2: [Maps to criterion 2]**
+```bash
+[command]
+```
+Expected: [output]
+
+## Implementation Steps
+
+**Step 1:** [action] (≤20 lines)
+```language
+[exact code]
+```
+**Validation:** `command` → Expected: [output]
+✅ **Checkpoint**
+
+## Estimated Effort
+
+**Size:** Small
+**Time:** 1h
+**Lines:** ~X lines
+**Reference:** [example from calibration.mdc]
+```
+
+---
+
+## Final Checklist
+
+Before submitting task to AI:
+
+1. **Run automated subjective check** - No forbidden terms?
+2. **Verify section separation** - ValidationScripts not in Success Criteria?
+3. **Check step sizes** - All ≤20 lines?
+4. **Validate orchestration logic** - Decision matches domain count?
+5. **Test validation commands** - Do they actually work?
+
+**If all ✅ → Task is AI-ready**
+**If any ❌ → Apply auto-revision rules**
