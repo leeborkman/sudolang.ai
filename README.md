@@ -1,45 +1,41 @@
 # AIDD with SudoLang.ai
 
-**The standard library for AI Driven Development.**
+**A standard library for AI Driven Development.**
 
 A public collection of reusable metaprograms, agent scripts, and prompt modules.
 
 **SudoLang** is a pseudocode language for prompting large language models with clear structure, strong typing, and explicit control flow.
 
-## 🚀 Quick Start with AIDD CLI
+*NOTE: this fork has been heavily customised by Lee Borkman (leebb@canva.com), with extra process, and rules relevant to Canva frontend development stack and practices. This remains a work-in-progress.*
 
-1. **Install SudoLang syntax highlighting**: Visit the [SudoLang Github Repository](https://github.com/paralleldrive/sudolang-llm-support) and install syntax highlighting for your editor.
+## ⚡ Quickstart
 
-2. **Clone the AI system**:
+Get started with AIDD in Cursor in 3 simple steps:
 
+1. **Get the code from GitHub**:
    ```bash
-   # Recommended: Creates ai/ folder + .cursor symlink for automatic integration
-   npx aidd --cursor my-project
-
-   # Alternative: Just the ai/ folder (manual integration required)
-   npx aidd my-project
+   git clone https://github.com/leeborkman/sudolang.ai.git
    ```
 
-3. **Explore the structure**:
+2. **Add the rules to your Cursor project**:
+   - Copy the `ai/` directory from the cloned repo into your Cursor project
+   - Or create a symlink: `ln -s /path/to/sudolang.ai/ai /path/to/your-project/ai`
 
-   ```bash
-   cd my-project
-   ls ai/                              # See available components
-   cat ai/aidd-always-please.mdc      # Read the main orchestrator
+3. **Start using AIDD in Cursor**:
+   - Open Cursor Chat
+   - Add the "always" files to the chat context:
+     - `ai/aidd-always-agent-orchestrator.mdc`
+     - `ai/aidd-always-please.mdc`
+   - Type `/wizard` or `/start` to launch the interactive workflow
+
+4. **Optional: Add to your local `.gitignore`**:
+   ```gitignore
+   # AIDD
+   aidd-planning/*
+   .cursor/aidd-*
    ```
 
-4. **Start using AI workflows**:
-   - Reference `ai/aidd-*.mdc` files in AI prompts for better context
-   - Use `ai/aidd-cmd-*.md` as workflow templates
-   - Customize rules for your specific project needs
-
-This gives you immediate access to:
-
-- 🤖 **Agent orchestration rules** (`aidd-always-*.mdc`)
-- ⚙️ **AI workflow commands** (`aidd-cmd-*.md`)
-- 📋 **Development best practices** (`aidd-language-*.mdc`, `aidd-core-tdd.mdc`)
-- 🎯 **Product management tools** (`aidd-core-productmanager.mdc`)
-- 🎨 **UI/UX guidelines** (`aidd-org-ui.mdc`)
+That's it! You now have access to AI-powered workflows for development, planning, and code review.
 
 ## Why SudoLang?
 
